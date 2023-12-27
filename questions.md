@@ -1886,6 +1886,8 @@ Django поставляется с системой аутентификации
 - [Django Model and Form Validation](http://zetcode.com/lang/python/introspection/)
 - [Model instance reference](https://docs.djangoproject.com/en/4.2/ref/models/instances/#validating-objects)
 
+  Валидаторы — это вызываемые функции, которые проверяют поля объекта и выдают ValidationError, если они содержат значения, которые не соответствуют нашим желаемым критериям.
+
 ```python
 models.Model ---> def full_clean()  
                     |-----------> def clean_fields() -------------> models.Field
@@ -1903,7 +1905,8 @@ hook/custom - то, где можно написать свой код для п
 4. Подтвердить ограничения – Model.validate_constraints()  
 Все четыре шага выполняются при вызове модели full_clean() метода. 
 Однако обратите внимание, что, как и Model.full_clean(), clean() модели метод не вызывается при вызове метода save() вашей модели.
-Когда вы используете ModelForm, вызов is_valid() выполнит эти шаги проверки для все поля, включенные в форму.  
+Когда вы используете ModelForm, вызов is_valid() выполнит эти шаги проверки для все поля, включенные в форму.
+
 
 ### Сохранение модели
 Когда вы сохраняете объект, Django выполняет следующие шаги:  
