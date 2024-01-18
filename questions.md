@@ -1787,9 +1787,34 @@ GET игнорируются сознательно (и все другие за
 
 Сигналы – это события в экосистеме Джанго. С помощью сигналов подсистемы оповещают приложение о том, что случилось. Чтобы читать сигналы, программист регистрирет обработчики сигналов. Сигналы распространяются синхронно. Это значит, подписав на один сигнал сотню обработчиков, мы увеличим время, необходимое на отдачу ответа.
 
+Сигналы делятся на несколько групп: Model signals, Managment signals, Request/response signals, Test signals.
 Основные сигналы это начало запроса и его окончание, перед сохранением модели и после, обращение к базе данных.
 
 **Важно:** сигналы моделей работают поштучно, то есть для одной модели. При пакетной обработке, например, `queryset.all().delete()` или `queryset.all().update({'foo'=42})`, события об удалении или изменения не будут вызваны.
+Обработчики сигналов обычно размещаются в модулу signals.py приложения. Хотя это не обязательно.
+``` python
+# signals.py
+# описание обработчиков сигналов
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from scan_network_app.models import SnmpOID
+
+@receiver(post_save, sender=SnmpOID)
+def save_snmp_oid(sender, instance, **kwargs):
+    print('обработка сигнала')
+
+# apps.py
+# Подключение сигналов
+from django.apps import AppConfig
+
+class ScanNetworkAppConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'scan_network_app'
+
+    def ready(self) -> None:
+        import scan_network_app.signals
+```
 
 ## Как реализуется связь m2m на уровне базы данных
 
