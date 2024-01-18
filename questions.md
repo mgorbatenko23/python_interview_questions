@@ -1815,6 +1815,8 @@ class ScanNetworkAppConfig(AppConfig):
     def ready(self) -> None:
         import scan_network_app.signals
 ```
+Пользовательские сигналы - https://www.tune-it.ru/web/iq47/blog/-/blogs/django-signals
+https://simpleisbetterthancomplex.com/tutorial/2016/07/28/how-to-create-django-signals.html
 
 ## Как реализуется связь m2m на уровне базы данных
 
