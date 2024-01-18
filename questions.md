@@ -1793,6 +1793,7 @@ GET игнорируются сознательно (и все другие за
 **Важно:** сигналы моделей работают поштучно, то есть для одной модели. При пакетной обработке, например, `queryset.all().delete()` или `queryset.all().update({'foo'=42})`, события об удалении или изменения не будут вызваны.
 Обработчики сигналов обычно размещаются в модулу signals.py приложения. Хотя это не обязательно.
 ``` python
+# первый способ подключения через декораторы
 # signals.py
 # описание обработчиков сигналов
 from django.db.models.signals import post_save
@@ -1815,6 +1816,34 @@ class ScanNetworkAppConfig(AppConfig):
     def ready(self) -> None:
         import scan_network_app.signals
 ```
+``` python
+# второй способ подключения с помошью метода - Signal.connect()
+# signals.py
+def create_snmp_oid(sender, instance, created, **kwargs):
+    if created:
+        print('=== create_snmp_oid signal ===')
+
+def save_snmp_oid(sender, instance, **kwargs):
+    print('=== save snmp oid signal ===')
+
+# apps.py
+# подключение сигналов
+from django.apps import AppConfig
+from django.db.models.signals import post_save
+
+from scan_network_app.signals import create_snmp_oid, save_snmp_oid
+
+class ScanNetworkAppConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'scan_network_app'
+
+    def ready(self):
+        from scan_network_app.models import SnmpOID  # импортируем модель только тут
+
+        post_save.connect(create_snmp_oid, sender=SnmpOID)
+        post_save.connect(save_snmp_oid, sender=SnmpOID)
+```
+
 Пользовательские сигналы - https://www.tune-it.ru/web/iq47/blog/-/blogs/django-signals
 https://simpleisbetterthancomplex.com/tutorial/2016/07/28/how-to-create-django-signals.html
 
