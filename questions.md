@@ -1746,9 +1746,44 @@ getattr(globals()['Foo'](), 'hello')()
 
 ## Что такое Middleware, для чего, как реализуется
 
-Middleware – особый объект, который обычно изменяет входящий запрос или исходящий ответ. Например, добавляет заголовки, делает предварительные проверки. Middleware нужен, когда требуется подвергнуть обработке все запросы приложения.
+Middleware – особый объект, который обычно изменяет входящий запрос или исходящий ответ. Например, добавляет заголовки, делает предварительные проверки. Middleware нужен, когда требуется подвергнуть обработке все запросы приложения. Порядок имеет значение потому что, последующие middleware могут зависеть от предыдущих. Например, AuthenticationMiddleware сохраняет аутентифицированный пользователь в сеансе.
+Следовательно, он должен работать после SessionMiddleware.
+Промежуточное ПО можно записать ввиде функции
+```python
+def simple_middleware(get_response):
+    # One-time configuration and initialization.
 
-На уровне языка это объект с методами `process_request` и `process_response`. Методы должны вернуть принятый объект (запрос или ответ) для дальнейшей обработки или выкинуть исключение, если что-то не в порядке. В этом случает дальнейшая обработка прекращается.
+    def middleware(request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        response = get_response(request)
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
+
+    return middleware
+```
+Или его можно записать как клас, экземпляр которого можно вызвать
+```python
+class SimpleMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # One-time configuration and initialization.
+
+    def __call__(self, request):
+        # Code to be executed for each request before
+        # the view (and later middleware) are called.
+
+        response = self.get_response(request)
+
+        # Code to be executed for each request/response after
+        # the view is called.
+
+        return response
+```
 
 Чтобы включить Middleware, достаточно добавить путь к нему в список `MIDDLEWARE`.
 
